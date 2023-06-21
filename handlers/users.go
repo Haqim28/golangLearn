@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	dto "golang/dto/result"
 	usersdto "golang/dto/users"
 	"golang/models"
@@ -48,6 +49,13 @@ func (h *handler) GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if user.ID == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		response := dto.ErrorResult{Code: http.StatusNotFound, Message: "id: " + strconv.Itoa(id) + " not found"}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
 	response := dto.SuccessResult{Code: http.StatusOK, Data: convertResponse(user)}
 	json.NewEncoder(w).Encode(response)
@@ -73,7 +81,6 @@ func (h *handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// data form pattern submit to pattern entity db user
 	user := models.User{
 		Name:     request.Name,
 		Email:    request.Email,
@@ -86,12 +93,56 @@ func (h *handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(err.Error())
 	}
 
+	fmt.Println(data)
+
 	w.WriteHeader(http.StatusOK)
 	response := dto.SuccessResult{Code: http.StatusOK, Data: convertResponse(data)}
 	json.NewEncoder(w).Encode(response)
 }
 
-// Create UpdateUser method here ...
+func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	request := new(usersdto.UpdateUserRequest)
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	id, _ := strconv.Atoi(mux.Vars(r)["id"])
+
+	user := models.User{}
+
+	user.ID = id
+
+	if request.Name != "" {
+		user.Name = request.Name
+	}
+
+	if request.Email != "" {
+		user.Email = request.Email
+	}
+
+	if request.Password != "" {
+		user.Password = request.Password
+	}
+
+	data, err := h.UserRepository.UpdateUser(user, id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		response := dto.ErrorResult{Code: http.StatusInternalServerError, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	response := dto.SuccessResult{Code: http.StatusOK, Data: convertResponse(data)}
+	json.NewEncoder(w).Encode(response)
+}
+
+// Create DeleteUser method here ...
 
 func convertResponse(u models.User) usersdto.UserResponse {
 	return usersdto.UserResponse{
