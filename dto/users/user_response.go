@@ -1,0 +1,3 @@
+package usersdto
+
+// Declare UserResponse struct here ...
