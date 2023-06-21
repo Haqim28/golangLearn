@@ -1,40 +1,173 @@
 ### Table of Contents
 
-- [GORM Relation Has Many](#gorm-relation-has-many)
+- [Hashing Password](#hashing-password)
+  - [Introduction](#intoduction)
+  - [Package](#Package)
+  - [Handler](#Handler)
   - [Repository](#repository)
+  - [Routes](#routes)
 
 ---
 
-# GORM Relation Has Many
+# Hashing Password
 
-Reference: [Official GORM Website](https://gorm.io/docs/has_many.html)
+Reference: [Go Bcrypt](https://pkg.go.dev/golang.org/x/crypto/bcrypt)
 
-## Relation
+## Introduction
 
-For this section, example Has Many relation:
+For this section, Hashing password if User doing Register New Account
 
-- `User` &rarr; `Product`: to get User Product
+## Package
+
+- Inside `pkg` folder, create `bcrypt` folder, inside it create `hash_password.go` file, and write this below code
+
+  > File: `pkg/bcrypt/hash_password.go`
+
+  ```go
+  package bcrypt
+
+  import "golang.org/x/crypto/bcrypt"
+
+  func HashingPassword(password string) (string, error) {
+    hashedByte, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+    if err != nil {
+      return "", err
+    }
+    return string(hashedByte), nil
+  }
+
+  func CheckPasswordHash(password, hashedPassword string) bool {
+    err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+    return err == nil
+  }
+  ```
+
+## Handler
+
+- Inside `handlers` folder, create `auth.go` file and write this below code
+
+  > File: `handlers/auth.go`
+
+  ```go
+  package handlers
+
+  import (
+    authdto "golang/dto/auth"
+    dto "golang/dto/result"
+    "golang/models"
+    "golang/pkg/bcrypt"
+    "golang/repositories"
+    "encoding/json"
+    "net/http"
+
+    "github.com/go-playground/validator/v10"
+  )
+
+  type handlerAuth struct {
+    AuthRepository repositories.AuthRepository
+  }
+
+  func HandlerAuth(AuthRepository repositories.AuthRepository) *handlerAuth {
+    return &handlerAuth{AuthRepository}
+  }
+
+  func (h *handlerAuth) Register(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "application/json")
+
+    request := new(authdto.RegisterRequest)
+    if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+      w.WriteHeader(http.StatusBadRequest)
+      response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+      json.NewEncoder(w).Encode(response)
+      return
+    }
+
+    validation := validator.New()
+    err := validation.Struct(request)
+    if err != nil {
+      w.WriteHeader(http.StatusBadRequest)
+      response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+      json.NewEncoder(w).Encode(response)
+      return
+    }
+
+    password, err := bcrypt.HashingPassword(request.Password)
+    if err != nil {
+      w.WriteHeader(http.StatusInternalServerError)
+      response := dto.ErrorResult{Code: http.StatusInternalServerError, Message: err.Error()}
+      json.NewEncoder(w).Encode(response)
+    }
+
+    user := models.User{
+      Name:     request.Name,
+      Email:    request.Email,
+      Password: password,
+    }
+
+    data, err := h.AuthRepository.Register(user)
+    if err != nil {
+      w.WriteHeader(http.StatusInternalServerError)
+      response := dto.ErrorResult{Code: http.StatusInternalServerError, Message: err.Error()}
+      json.NewEncoder(w).Encode(response)
+    }
+
+    w.WriteHeader(http.StatusOK)
+    response := dto.SuccessResult{Code: http.StatusOK, Data: convertResponse(data)}
+    json.NewEncoder(w).Encode(response)
+  }
+  ```
 
 ## Repository
 
-- Inside `repositories` folder, in `users.go` file write this below code
+- Inside `repositories` folder, create `auth.go` file and write this below code
 
-  > File: `repositories/users.go`
+  > File: `repositories/auth.go`
 
   ```go
-  func (r *repository) FindUsers() ([]models.User, error) {
-    var users []models.User
-    err := r.db.Preload("Profile").Preload("Products").Find(&users).Error // add this code
+  package repositories
 
-    return users, err
+  import (
+    "golang/models"
+
+    "gorm.io/gorm"
+  )
+
+  type AuthRepository interface {
+    Register(user models.User) (models.User, error)
   }
 
-  func (r *repository) GetUser(ID int) (models.User, error) {
-    var user models.User
-    err := r.db.Preload("Profile").Preload("Products").First(&user, ID).Error // add this code
+  func RepositoryAuth(db *gorm.DB) *repository {
+    return &repository{db}
+  }
+
+  func (r *repository) Register(user models.User) (models.User, error) {
+    err := r.db.Create(&user).Error
 
     return user, err
   }
   ```
 
-  \*In this case, just add `Preload` to make relation
+## Routes
+
+- Inside `routes` folder, create `auth.go` file and write this below code
+
+  > File: `routes/auth.go`
+
+  ```go
+  package routes
+
+  import (
+    "golang/handlers"
+    "golang/pkg/mysql"
+    "golang/repositories"
+
+    "github.com/gorilla/mux"
+  )
+
+  func AuthRoutes(r *mux.Router) {
+    userRepository := repositories.RepositoryUser(mysql.DB)
+    h := handlers.HandlerAuth(userRepository)
+
+    r.HandleFunc("/register", h.Register).Methods("POST")
+  }
+  ```
