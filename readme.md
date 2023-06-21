@@ -1,21 +1,55 @@
-# Prepare
+# Make Hello World
 
-### 1. Download
+### 1. Initializing project
 
-- Golang: [Click Here](https://go.dev/dl/)
-- XAMPP: [Click Here](https://www.apachefriends.org/download.html)
-- Postman: [Click Here](https://www.postman.com/downloads/?utm_source=postman-home)
+```bash
+go mod init _project_name_
+```
 
-### 2. Install
+### 2. Install gorilla/mux
 
-- Follow the instruction from [Golang Official Website](https://go.dev/doc/install)
+```bash
+go get -u github.com/gorilla/mux
+```
 
-- How to Check on Terminal or Command Propt:
+Package `gorilla/mux` implements a request router and dispatcher for matching incoming requests to their respective handler.
 
-  ```bash
-  go version
-  ```
+### 3. Create `main.go` file and write this below code to print 'Hello wolrd'
 
-### 3. Extension on VS Code
+> File : `main.go`
 
-![Go Extension](./extension.png)
+```go
+package main
+
+import (
+	"fmt"
+	"net/http"
+	"github.com/gorilla/mux"
+)
+
+func main() {
+
+	// On Terminal/Command Propt
+  fmt.Println("Hello World!")
+
+	// On http (API)
+	r := mux.NewRouter()
+
+	r.HandleFunc("/", func (w http.ResponseWriter, r *http.Request){
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Hello World"))
+	}).Methods("GET")
+
+	fmt.Println("server running localhost:5000")
+	http.ListenAndServe("localhost:5000", r)
+}
+```
+
+### 4. Running
+
+Running Your App with this commad
+
+```
+go run main.go
+```
