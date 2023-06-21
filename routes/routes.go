@@ -5,5 +5,5 @@ import (
 )
 
 func RouteInit(r *mux.Router) {
-	// Call UserRoutes function here ...
+	UserRoutes(r)
 }

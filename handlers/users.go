@@ -1,21 +1,66 @@
 package handlers
 
-// Import
-//	"golang/dto/result",
-//	"golang/dto/users",
-//	"golang/models",
-//	"golang/repositories",
-//	"encoding/json",
-//	"net/http",
-//	"strconv",
-//	"github.com/gorilla/mux" here ...
+import (
+	"encoding/json"
+	dto "golang/dto/result"
+	usersdto "golang/dto/users"
+	"golang/models"
+	"golang/repositories"
+	"net/http"
+	"strconv"
 
-// Declare handler struct here ...
+	// Import validator here ...
+	"github.com/gorilla/mux"
+)
 
-// Declare HandlerUser function here ...
+type handler struct {
+	UserRepository repositories.UserRepository
+}
 
-// Declare FindUsers method here ...
+func HandlerUser(UserRepository repositories.UserRepository) *handler {
+	return &handler{UserRepository}
+}
 
-// Declare GetUser method here ...
+func (h *handler) FindUsers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 
-// Declare convertResponse function here ...
+	users, err := h.UserRepository.FindUsers()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(err.Error())
+	}
+
+	w.WriteHeader(http.StatusOK)
+	response := dto.SuccessResult{Code: http.StatusOK, Data: users}
+
+	json.NewEncoder(w).Encode(response)
+}
+
+func (h *handler) GetUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	id, _ := strconv.Atoi(mux.Vars(r)["id"])
+
+	user, err := h.UserRepository.GetUser(id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	response := dto.SuccessResult{Code: http.StatusOK, Data: convertResponse(user)}
+	json.NewEncoder(w).Encode(response)
+}
+
+// Create CreateUser method here ...
+
+func convertResponse(u models.User) usersdto.UserResponse {
+	return usersdto.UserResponse{
+		ID:       u.ID,
+		Name:     u.Name,
+		Email:    u.Email,
+		Password: u.Password,
+	}
+}

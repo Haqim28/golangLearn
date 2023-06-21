@@ -1,13 +1,38 @@
 package repositories
 
-// Import "golang/models", "gorm.io/gorm"
+import (
+	"golang/models"
+	// Import time here ...
 
-// Declare UserRepository interface here ...
+	"gorm.io/gorm"
+)
 
-// Declare repository struct here ...
+type UserRepository interface {
+	FindUsers() ([]models.User, error)
+	GetUser(ID int) (models.User, error)
+	// Declare CreateUser interface here ...
+}
 
-// Create RepositoryUser function here ...
+type repository struct {
+	db *gorm.DB
+}
 
-// Create FindUsers method here ...
+func RepositoryUser(db *gorm.DB) *repository {
+	return &repository{db}
+}
 
-// Create GetUser method here ...
+func (r *repository) FindUsers() ([]models.User, error) {
+	var users []models.User
+	err := r.db.Raw("SELECT * FROM users").Scan(&users).Error
+
+	return users, err
+}
+
+func (r *repository) GetUser(ID int) (models.User, error) {
+	var user models.User
+	err := r.db.Raw("SELECT * FROM users WHERE id=?", ID).Scan(&user).Error
+
+	return user, err
+}
+
+// Create CreateUser method here ...

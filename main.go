@@ -1,9 +1,9 @@
 package main
 
 import (
-	// Import golang/database here ...
-	// Import golang/pkg/mysql here ...
 	"fmt"
+	"golang/database"
+	"golang/pkg/mysql"
 	"golang/routes"
 	"net/http"
 
@@ -11,9 +11,11 @@ import (
 )
 
 func main() {
-	// initial DB here ...
+	// initial DB
+	mysql.DatabaseInit()
 
-	// Run migration here ...
+	// run migration
+	database.RunMigration()
 
 	r := mux.NewRouter()
 
