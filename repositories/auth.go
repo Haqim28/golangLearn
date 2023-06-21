@@ -1,9 +1,25 @@
-// Create package repositories here ...
+package repositories
 
-// import the required packages here ... 
+import (
+	"golang/models"
 
-// AuthRepository interface here ...
+	"gorm.io/gorm"
+)
 
-// RepositoryAuth function here ...
+type AuthRepository interface {
+	Register(user models.User) (models.User, error)
+	Login(email string) (models.User, error)
+}
 
-// Register method here ...
+func RepositoryAuth(db *gorm.DB) *repository {
+	return &repository{db}
+}
+
+func (r *repository) Register(user models.User) (models.User, error) {
+	err := r.db.Create(&user).Error
+
+	return user, err
+}
+
+
+// Create Login method here ...

@@ -1,5 +1,17 @@
-// Create package routes here ...
+package routes
 
-// import the required packages here ...
+import (
+	"golang/handlers"
+	"golang/pkg/mysql"
+	"golang/repositories"
 
-// Create AuthRoutes function and add "/register" route with handler Register and POST method here ...
+	"github.com/gorilla/mux"
+)
+
+func AuthRoutes(r *mux.Router) {
+	userRepository := repositories.RepositoryUser(mysql.DB)
+	h := handlers.HandlerAuth(userRepository)
+
+	r.HandleFunc("/register", h.Register).Methods("POST")
+	// Create "/login" route using handler Login and method POST here ...
+}
