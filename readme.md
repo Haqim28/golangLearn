@@ -41,7 +41,7 @@
 
 ### Database
 
-- Create database named `dumbmerch`
+- Create database named `golang_learning`
 
 ### Models
 
@@ -75,8 +75,8 @@
   package database
 
   import (
-    "dumbmerch/models"
-    "dumbmerch/pkg/mysql"
+    "golang/models"
+    "golang/pkg/mysql"
     "fmt"
   )
 
@@ -197,7 +197,7 @@
   package repositories
 
   import (
-    "dumbmerch/models"
+    "golang/models"
     "gorm.io/gorm"
   )
 
@@ -239,10 +239,10 @@
   package handlers
 
   import (
-    dto "dumbmerch/dto/result"
-    usersdto "dumbmerch/dto/users"
-    "dumbmerch/models"
-    "dumbmerch/repositories"
+    dto "golang/dto/result"
+    usersdto "golang/dto/users"
+    "golang/models"
+    "golang/repositories"
     "encoding/json"
     "net/http"
     "strconv"
@@ -311,9 +311,9 @@
   package routes
 
   import (
-    "dumbmerch/handlers"
-    "dumbmerch/pkg/mysql"
-    "dumbmerch/repositories"
+    "golang/handlers"
+    "golang/pkg/mysql"
+    "golang/repositories"
     "github.com/gorilla/mux"
   )
 
@@ -351,9 +351,9 @@ Modify `main.go` file, adding `Initial Database` and Running `Auto Migration`
 package main
 
 import (
-	"dumbmerch/database"
-	"dumbmerch/pkg/mysql"
-	"dumbmerch/routes"
+	"golang/database"
+	"golang/pkg/mysql"
+	"golang/routes"
 	"fmt"
 	"net/http"
 	"github.com/gorilla/mux"
