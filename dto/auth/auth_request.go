@@ -1,0 +1,3 @@
+package authdto
+
+// Declare AuthRequest struct here ...

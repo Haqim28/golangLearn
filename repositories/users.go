@@ -14,10 +14,6 @@ type UserRepository interface {
 	DeleteUser(user models.User) (models.User, error)
 }
 
-type repository struct {
-	db *gorm.DB
-}
-
 func RepositoryUser(db *gorm.DB) *repository {
 	return &repository{db}
 }
@@ -49,7 +45,7 @@ func (r *repository) UpdateUser(user models.User) (models.User, error) {
 }
 
 func (r *repository) DeleteUser(user models.User) (models.User, error) {
-	// Using "Delete" method here ...
+	err := r.db.Delete(&user).Error
 
 	return user, err
 }

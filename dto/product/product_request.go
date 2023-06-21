@@ -1,0 +1,3 @@
+package productdto
+
+// Declare ProductRequest struct here ...
