@@ -15,7 +15,7 @@
 
   ```go
   import (
-    "dumbmerch/models"
+    "golang/models"
     "time"
     "gorm.io/gorm"
   )
@@ -50,10 +50,10 @@
   package handlers
 
   import (
-    dto "dumbmerch/dto/result"
-    usersdto "dumbmerch/dto/users"
-    "dumbmerch/models"
-    "dumbmerch/repositories"
+    dto "golang/dto/result"
+    usersdto "golang/dto/users"
+    "golang/models"
+    "golang/repositories"
     "encoding/json"
     "net/http"
     "strconv"
