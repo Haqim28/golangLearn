@@ -1,19 +1,19 @@
 ### Table of Contents
 
-- [GORM Relation belongs to](#gorm-relation-has-one)
+- [GORM Relation Has Many](#gorm-relation-has-many)
   - [Repository](#repository)
 
 ---
 
-# GORM Relation Has One
+# GORM Relation Has Many
 
-Reference: [Official GORM Website](https://gorm.io/docs/has_one.html)
+Reference: [Official GORM Website](https://gorm.io/docs/has_many.html)
 
 ## Relation
 
-For this section, example Has One relation:
+For this section, example Has Many relation:
 
-- `User` &rarr; `Profile`: to get User Profile
+- `User` &rarr; `Product`: to get User Product
 
 ## Repository
 
@@ -24,14 +24,14 @@ For this section, example Has One relation:
   ```go
   func (r *repository) FindUsers() ([]models.User, error) {
     var users []models.User
-    err := r.db.Preload("Profile").Find(&users).Error // add this code
+    err := r.db.Preload("Profile").Preload("Products").Find(&users).Error // add this code
 
     return users, err
   }
 
   func (r *repository) GetUser(ID int) (models.User, error) {
     var user models.User
-    err := r.db.Preload("Profile").First(&user, ID).Error // add this code
+    err := r.db.Preload("Profile").Preload("Products").First(&user, ID).Error // add this code
 
     return user, err
   }
