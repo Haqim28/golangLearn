@@ -1,14 +1,14 @@
-# Update data with ORM
+# Delete data with ORM
 
 ### Repositories
 
 > File: `repositories/users.go`
 
-- Update User data using `Save` method
+- Delete User data using `Delete` method
 
   ```go
-  func (r *repository) UpdateUser(user models.User) (models.User, error) {
-    err := r.db.Save(&user).Error // Using Save method
+  func (r *repository) DeleteUser(user models.User) (models.User, error) {
+    err := r.db.Delete(&user).Error // Using Delete method
 
     return user, err
   }

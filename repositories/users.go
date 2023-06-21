@@ -11,6 +11,7 @@ type UserRepository interface {
 	GetUser(ID int) (models.User, error)
 	CreateUser(user models.User) (models.User, error)
 	UpdateUser(user models.User) (models.User, error)
+	DeleteUser(user models.User) (models.User, error)
 }
 
 type repository struct {
@@ -42,7 +43,13 @@ func (r *repository) CreateUser(user models.User) (models.User, error) {
 }
 
 func (r *repository) UpdateUser(user models.User) (models.User, error) {
-	// Using "Save" method here ...
+	err := r.db.Save(&user).Error
+
+	return user, err
+}
+
+func (r *repository) DeleteUser(user models.User) (models.User, error) {
+	// Using "Delete" method here ...
 
 	return user, err
 }
