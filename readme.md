@@ -409,7 +409,7 @@ For this section, example Belongs To relation:
   package repositories
 
   import (
-    "dumbmerch/models"
+    "golang/models"
 
     "gorm.io/gorm"
   )
